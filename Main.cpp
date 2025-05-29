@@ -3,6 +3,7 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
+#include <list>
 
 
 using namespace std;
@@ -306,13 +307,61 @@ bool Stack<T>::contains(T item) {
     }
     return false;
 }
+//Classe Pair
+//basicamente classe de tupla tamanho 2, professor pediu pra uma nos casos de colisao
+template<typename T, typename U>
+class Pair {
+private:
+    T first;
+    U last;
+public:
+    Pair(T item1, U item2);
+    Pair(T item);
+    Pair();
+
+    T getFirst() {
+        return first;
+    }
+    U getLast() {
+        return last;
+    }
+    void setAll(T item1, U item2) {
+        first = item1;
+        last = item2;
+    }
+    void setFirst(T item) {
+        first = item;
+    }
+    void setLast(U item) {
+        last = item;
+    }
+};
+
+
+template<typename T, typename U>
+Pair<T, U>::Pair(T item) {
+    first = item;
+    last = U();
+}
+
+template<typename T, typename U>
+Pair<T, U>::Pair(T item1, U item2) {
+    first = item1;
+    last = item2;
+}
+
+template<typename T, typename U>
+Pair<T, U>::Pair() {
+    first = T();
+    last = U();
+}
 
 
 //class HashTable
 template<typename Key, typename T>
 class HashTable {
 private:
-    List<AVLTree<Pair<Key, T>> *table> *table;
+    List<Pair<Key, T> > *table;
 public:
     HashTable(int capacity);
     long unsigned int size;
@@ -433,15 +482,59 @@ long unsigned int HashTable<Key, T>::hash(const Key& key) const{
 }
 
 
+void cleanGiantString(List<string> giantString) {
+    ListNavigator<string> nav = giantString.getListNavigator();
+    List<string> cleanedGiantString;
+    string word;
+    string cleaned;
+
+    while (!nav.end()) {
+        nav.getCurrentItem(word);
+        cleaned.clear();
+
+        for (char c: word) {
+            if (!ispunct(c)) cleaned += c;
+        }
+
+        if (!cleaned.empty()) {
+            //HashTable<string, string> ht.insert(cleaned);
+            cleanedGiantString.insertBack(cleaned);
+        }
+
+        nav.next();
+    }
+
+
+        //aqui so pra teste
+        ListNavigator<string> nav_test = cleanedGiantString.getListNavigator();
+        string line;
+        while (!nav_test.end()) {
+            nav_test.getCurrentItem(line);
+            cout << line << endl;
+            nav_test.next();
+        }
+
+}
+
 
 int main() {
     string line;
-    List<string> alienList;
+    List<string> giantString;
 
-    while (getline(cin, line)) {
-        if (line == "~") break;
-        alienList.insertBack(line);
+    //por enquanto so reconhece quando ### esta na ultima linha sozinho
+    while (getline(cin, line) && line != "###") {
+        giantString.insertBack(line);
     }
 
+    cleanGiantString(giantString);
     return 0;
 }
+
+
+/*
+When Mr. Bilbo Baggins of Bag End announced that he
+would shortly be celebrating his eleventy-first birthday
+with a party of special magnificence, there was much talk and e
+xcitement in Hobbiton.
+###
+*/
