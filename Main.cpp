@@ -14,6 +14,8 @@ private:
     T item;
 
 public:
+    Node<T>* left;
+    Node<T>* right;
     Node<T> *next;
     Node<T> *prev;
     T getItem();
@@ -307,61 +309,182 @@ bool Stack<T>::contains(T item) {
     }
     return false;
 }
-//Classe Pair
-//basicamente classe de tupla tamanho 2, professor pediu pra uma nos casos de colisao
-template<typename T, typename U>
-class Pair {
-private:
-    T first;
-    U last;
-public:
-    Pair(T item1, U item2);
-    Pair(T item);
-    Pair();
 
-    T getFirst() {
-        return first;
-    }
-    U getLast() {
-        return last;
-    }
-    void setAll(T item1, U item2) {
-        first = item1;
-        last = item2;
-    }
-    void setFirst(T item) {
-        first = item;
-    }
-    void setLast(U item) {
-        last = item;
-    }
+template<typename Key, typename T>
+class AVLTree {
+private:
+    Node<T>* root;
+
+public:
+    AVLTree();
+    ~AVLTree();
+    void create();
+    void insert(Key key, T item);
+    bool remove(Key key);
+    bool search(Key key, T item);
+    void preorderTraversal();
+    void inorderTraversal();
+    void postorderTraversal();
+    void insert(T item, Node<T>* p);
+    void remove(T item, Node<T>* p);
+    void remove_aux(T item, Node<T>* p);
+    void search(T item, Node<T>* p);
+    void preorderTraversal(Node<T>* p);
+    void inorderTraversal(Node<T>* p);
+    void postorderTraversal(Node<T>* p);
+    //adicionei a height que nao tinha no uml do prof
+    //dps eu tiror, so coloquei pra testar mais facil
+    int height(Node<T> *root);
+    void generateDot(Node<T> *root, std::ostream& out);
+    void drawTree(Node<T> *root);
+
+
 };
 
+template<typename Key, typename T>
+int AVLTree<Key, T>::height(Node<T> *root) {
+    // se nao tiver o root o tamanho da arvore é 0
+    if (root == NULL) {
+        cout << "a arvora ta vazia :c";
+        return 0;
+    } else {
+        // tem q usar recursividade aq pra checar o tamanho
+        int leftSubTreeDepth = height(root->left);
+        int rightSubTreeDepth = height(root->right);
 
-template<typename T, typename U>
-Pair<T, U>::Pair(T item) {
-    first = item;
-    last = U();
+        return std::max(leftSubTreeDepth, rightSubTreeDepth) + 1;
+    }
 }
 
-template<typename T, typename U>
-Pair<T, U>::Pair(T item1, U item2) {
-    first = item1;
-    last = item2;
+template<typename Key, typename T>
+AVLTree<Key, T>::AVLTree() {
+    root = nullptr;
 }
 
-template<typename T, typename U>
-Pair<T, U>::Pair() {
-    first = T();
-    last = U();
+//de acordo com o slide do prof é pra ta assim (?)
+template<typename Key, typename T>
+void AVLTree<Key, T>::create() {
+    root = nullptr;
 }
 
+template<typename Key, typename T>
+void AVLTree<Key, T>::insert(Key key, T item) {
+    //se o root ja existe adicionar os nodes
+    Node<T>* parent = nullptr;
+    Node<T>* current = this->root;
+
+    while (current != nullptr) {
+        parent = current;
+        if (key == current->key) {
+            cout << "Elemento ja existe";
+            return;
+        }
+        else if (key < current->key) {
+            current = current->left;
+        }
+        else {
+            current = current->right;
+        }
+    }
+
+
+}
+
+//deleta, se true quer dizer q removeu e falso quer dizer q nunca existiur
+/*template<typename Key, typename T>
+bool AVLTree<Key, T>::remove(Key key) {
+
+}*/
+
+template<typename Key, typename T>
+bool AVLTree<Key, T>::search(Key key, T item) {
+    if (root == NULL) return NULL;
+    Node<T> *aux = root;
+    while (aux->item != key) {
+        if (key < aux->item) {
+            aux = aux->left;
+        }else {
+
+        }
+    }
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::preorderTraversal() {
+
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::inorderTraversal() {
+
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::postorderTraversal() {
+
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::insert(T item, Node<T> *p) {
+    if (p == nullptr) {
+        p = new Node<T>(item);
+        p->left = p->right = nullptr;
+        p->item = item;
+    } else if (item->key < p->item->key) {
+        insert(item, p->left);
+    } else if (item->key > p->item->key) {
+        insert(item, p->right);
+    } else {
+        cout <<"elementor ja existe";
+        //dps que tiver tudo certo apenas usar return
+    }
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::remove(T item, Node<T> *p) {
+
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::remove_aux(T item, Node<T> *p) {
+
+}
+
+//aq ta do jeito do slide do prof
+template<typename Key, typename T>
+void AVLTree<Key, T>::search(T item, Node<T> *p) {
+    if (p == nullptr) {
+        cout << "Elemento nao encontrando";
+    }else if (item->key < p->item->key) {
+        search(item, p->left);
+    }else if (item->key > p->item->key) {
+        search(item, p->right);
+    } else {
+        item = p->item;
+    }
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::preorderTraversal(Node<T> *p) {
+
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::inorderTraversal(Node<T> *p) {
+
+}
+
+template<typename Key, typename T>
+void AVLTree<Key, T>::postorderTraversal(Node<T> *p) {
+
+}
 
 //class HashTable
 template<typename Key, typename T>
 class HashTable {
 private:
-    List<Pair<Key, T> > *table;
+    List<AVLTree<Key,T>> *table;
+
 public:
     HashTable(int capacity);
     long unsigned int size;
@@ -370,17 +493,15 @@ public:
 
     long unsigned int getSize() const;
     void insert(Key key, T item);
-    void insert(Pair<Key, T> pair);
     bool remove(Key key);
     bool search(Key key, T item);
-    T findItemFromKey(Key key) const;
     bool empty();
     long unsigned int hash(const Key& key) const;
 };
 
 template<typename Key, typename T>
 HashTable<Key, T>::HashTable(int capacity){
-    table = new List<Pair<Key, T>>[capacity];
+    table = new List<AVLTree<Key,T>>[capacity];
     size = capacity;
 }
 
@@ -398,24 +519,17 @@ template<typename Key, typename T>
 void HashTable<Key, T>::insert(Key key, T item){
     long unsigned int index = hash(key);
 
-    table[index].insertBack(Pair<Key, T>(key, item));
+    table[index].insertBack(AVLTree<Key,T>());
 }
 
-template<typename Key, typename T>
-void HashTable<Key, T>::insert(Pair<Key, T> pair){
-    long unsigned int index = hash(pair.getFirst());
-    table[index].push(pair);
-}
 
 template<typename Key, typename T>
 bool HashTable<Key, T>::remove(Key key) {
     long unsigned int index = hash(key);
-    List<Pair<Key, T>>& target = table[index];
-    ListNavigator<Pair<Key, T>> nav = target.getListNavigator();
-    Pair<Key, T> currentItem;
+    List<AVLTree<Key, T>>& target = table[index];
+    ListNavigator<AVLTree<Key, T>> nav = target.getListNavigator();
     while (!nav.end()) {
-        currentItem = nav.getCurrentItem();
-        if (currentItem.getFirst() == key) {
+        if (nav.getCurrentItem().getFirst() == key) {
             nav.removeCurrentItem();
             return true;
         }
@@ -427,15 +541,15 @@ bool HashTable<Key, T>::remove(Key key) {
 template<typename Key, typename T>
 bool HashTable<Key, T>::search(Key key, T item){
     long unsigned int index = hash(key);
-    List<Pair<Key, T>>& target = table[index];
-    ListNavigator<Pair<Key, T>> nav = target.getListNavigator();
-    Pair<Key, T> currentItem;
+    const List<AVLTree<Key, T>>& bucket = table[index];
+    ListNavigator<AVLTree<Key, T>> nav = bucket.getListNavigator();
     while (!nav.end()) {
-        currentItem = nav.getCurrentItem();
-        if (currentItem.getFirst() == key && currentItem.getLast() == item) {
+        const AVLTree<Key, T>& p = nav.getCurrentItem();
+        if (p.getFirst() == key && p.getLast() == item) {
             cout << item << " found at index " << index << endl;
             return true;
         }
+        nav.next();
     }
     cout << key << " not found" << endl;
     return false;
@@ -454,23 +568,6 @@ bool HashTable<Key, T>::empty(){
 
 
 template<typename Key, typename T>
-T HashTable<Key, T>::findItemFromKey(Key key) const {
-    long unsigned int index = hash(key);
-    Node<Pair<Key, T>>* currentNode  = table[index].getHead();
-    while (true) {
-        if (currentNode == nullptr || currentNode->next == nullptr) {
-            break;
-        }
-        currentNode = currentNode->next;
-        if (currentNode->getItem().getFirst() == key) {
-            return currentNode->getItem().getLast();
-        }
-    }
-    return T();
-}
-
-
-template<typename Key, typename T>
 long unsigned int HashTable<Key, T>::hash(const Key& key) const{
     long unsigned int hashValue = 0;
     long unsigned int n = key.length();
@@ -481,12 +578,13 @@ long unsigned int HashTable<Key, T>::hash(const Key& key) const{
     return hashValue;
 }
 
-
-void cleanGiantString(List<string> giantString) {
+//Tira os sinais de pontuação das strings
+void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
     List<string> cleanedGiantString;
     string word;
     string cleaned;
+    HashTable<string, string> ht(10);
 
     while (!nav.end()) {
         nav.getCurrentItem(word);
@@ -497,7 +595,10 @@ void cleanGiantString(List<string> giantString) {
         }
 
         if (!cleaned.empty()) {
-            //HashTable<string, string> ht.insert(cleaned);
+            //nao tenho ctz se e pra ser assim o insert
+            //pq na minha cabeca key e item e pra ser a mesma coisa
+            ht.insert(cleaned, cleaned);
+            cout << cleaned << endl;
             cleanedGiantString.insertBack(cleaned);
         }
 
@@ -514,19 +615,60 @@ void cleanGiantString(List<string> giantString) {
             nav_test.next();
         }
 
+        //o key ainda tá com a ### nele
+        cout << key << endl;
+
+}
+// Função para gerar a saída em formato DOT
+template <typename Key, typename T>
+void AVLTree<Key,T>::generateDot(Node<T>* node, std::ostream& out) {
+    if (node == nullptr) {
+        return;
+    }
+
+    // Adiciona o nó atual com a altura
+    out << "    " << node->getKey() << " [label=\"" << node->getKey() << "\\nAltura: " << height(node) << "\"];\n";
+
+    // Conecta o nó atual aos filhos
+    if (node->getLeft()) {
+        out << "    " << node->getKey() << " -> " << node->getLeft()->getKey() << ";\n";
+    }
+    if (node->getRight()) {
+        out << "    " << node->getKey() << " -> " << node->getRight()->getKey() << ";\n";
+    }
+
+    // Chama recursivamente para os filhos
+    generateDot(node->getLeft(), out);
+    generateDot(node->getRight(), out);
 }
 
+// Função principal para desenhar a árvore
+template <typename Key, typename T>
+void AVLTree<Key,T>::drawTree(Node<T>* root) {
+    std::cout << "digraph G {\n";
+    generateDot(root, std::cout);
+    std::cout << "}\n";
+}
 
+//Lê cada linha e adiciona para uma List
 int main() {
     string line;
     List<string> giantString;
+    string key;
 
-    //por enquanto so reconhece quando ### esta na ultima linha sozinho
-    while (getline(cin, line) && line != "###") {
-        giantString.insertBack(line);
+    //por enquanto so reconhece quando ### esta na ultima linha sozinho e no começo
+    while (getline(cin, line)){
+        if (line.find('#')) {
+            giantString.insertBack(line);
+        }else {
+            key = line;
+            break;
+        }
+
     }
 
-    cleanGiantString(giantString);
+
+    cleanGiantString(key,giantString);
     return 0;
 }
 
@@ -536,5 +678,5 @@ When Mr. Bilbo Baggins of Bag End announced that he
 would shortly be celebrating his eleventy-first birthday
 with a party of special magnificence, there was much talk and e
 xcitement in Hobbiton.
-###
+### Key
 */
