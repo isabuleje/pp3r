@@ -317,7 +317,6 @@ private:
 
 public:
     AVLTree();
-    ~AVLTree();
     void create();
     void insert(Key key, T item);
     bool remove(Key key);
@@ -332,29 +331,14 @@ public:
     void preorderTraversal(Node<T>* p);
     void inorderTraversal(Node<T>* p);
     void postorderTraversal(Node<T>* p);
-    //adicionei a height que nao tinha no uml do prof
-    //dps eu tiror, so coloquei pra testar mais facil
-    int height(Node<T> *root);
+
+    //dps tirar isso aq, é so pra teste
     void generateDot(Node<T> *root, std::ostream& out);
     void drawTree(Node<T> *root);
 
-
 };
 
-template<typename Key, typename T>
-int AVLTree<Key, T>::height(Node<T> *root) {
-    // se nao tiver o root o tamanho da arvore é 0
-    if (root == NULL) {
-        cout << "a arvora ta vazia :c";
-        return 0;
-    } else {
-        // tem q usar recursividade aq pra checar o tamanho
-        int leftSubTreeDepth = height(root->left);
-        int rightSubTreeDepth = height(root->right);
 
-        return std::max(leftSubTreeDepth, rightSubTreeDepth) + 1;
-    }
-}
 
 template<typename Key, typename T>
 AVLTree<Key, T>::AVLTree() {
@@ -490,7 +474,6 @@ public:
     long unsigned int size;
 
     ~HashTable();
-
     long unsigned int getSize() const;
     void insert(Key key, T item);
     bool remove(Key key);
@@ -498,6 +481,7 @@ public:
     bool empty();
     long unsigned int hash(const Key& key) const;
 };
+
 
 template<typename Key, typename T>
 HashTable<Key, T>::HashTable(int capacity){
@@ -606,19 +590,21 @@ void cleanGiantString(string key,List<string> giantString) {
     }
 
 
-        //aqui so pra teste
-        ListNavigator<string> nav_test = cleanedGiantString.getListNavigator();
-        string line;
-        while (!nav_test.end()) {
-            nav_test.getCurrentItem(line);
-            cout << line << endl;
-            nav_test.next();
-        }
+    //aqui so pra teste
+    ListNavigator<string> nav_test = cleanedGiantString.getListNavigator();
+    string line;
+    while (!nav_test.end()) {
+        nav_test.getCurrentItem(line);
+        cout << line << endl;
+        nav_test.next();
+    }
 
         //o key ainda tá com a ### nele
         cout << key << endl;
 
 }
+
+
 // Função para gerar a saída em formato DOT
 template <typename Key, typename T>
 void AVLTree<Key,T>::generateDot(Node<T>* node, std::ostream& out) {
@@ -666,13 +652,21 @@ int main() {
         }
 
     }
-
-
-    cleanGiantString(key,giantString);
-    return 0;
 }
 
+//Pode mexer a vontade :D
+//Lista de tarefas
+//1. Ler a string extra gigante (feito)
+//1.5 Limpar a string de sinais(feito)
+//2. Ler a chave (feito mas falta tirar o ###)
+//3. Adicionar a AVL na HashTable (feito?)
+//3.5 Fazer esse drawTree e generateDot funcionarem
+//4. Resolver a colisao com AVL
+//5. Fazer os a AVL estar corretamente equilibrada
+//6. Mostrar a altura da chave na AVL
+//7. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml
 
+//Caso teste
 /*
 When Mr. Bilbo Baggins of Bag End announced that he
 would shortly be celebrating his eleventy-first birthday
