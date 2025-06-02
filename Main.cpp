@@ -611,32 +611,56 @@ void generateDot(Node<T>* node, std::ostream& out) {
 // Função principal para desenhar a árvore
 template <typename T>
 void drawTree(Node<T>* root) {
-    std::cout << "digraph G {\n";
+    cout << "digraph G {\n";
     generateDot(root, std::cout);
-    std::cout << "}\n";
+    cout << "}\n";
 }
 
 //Tira os sinais de pontuação das strings
 void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
     List<string> cleanedGiantString;
-    string word;
-    string cleaned;
     HashTable<string, string> ht(10);
 
     while (!nav.end()) {
-        nav.getCurrentItem(word);
-        cleaned.clear();
+        string phrase;
+        nav.getCurrentItem(phrase);
 
-        for (char c: word) {
-            if (!ispunct(c)) cleaned += c;
+        string currentWord;
+        string cleaned;
+
+        for (char c : phrase) {
+            if (c == ' ') {
+                if (!currentWord.empty()) {
+                    cleaned.clear();
+                    for (char ch : currentWord) {
+                        if (!ispunct(ch)) cleaned += ch;
+                    }
+
+                    if (!cleaned.empty()) {
+                        ht.insert(cleaned, cleaned);
+                        //dps tirar esse insertback pq era so pra teste
+                        cleanedGiantString.insertBack(cleaned);
+                    }
+
+                    currentWord.clear();
+                }
+            } else {
+                currentWord += c;
+            }
         }
 
-        if (!cleaned.empty()) {
-            //nao tenho ctz se e pra ser assim o insert
-            //pq na minha cabeca key e item e pra ser a mesma coisa
-            ht.insert(cleaned, cleaned);
-            cleanedGiantString.insertBack(cleaned);
+        // Ultima palavra da fraser
+        if (!currentWord.empty()) {
+            cleaned.clear();
+            for (char ch : currentWord) {
+                if (!ispunct(ch)) cleaned += ch;
+            }
+
+            if (!cleaned.empty()) {
+                ht.insert(cleaned, cleaned);
+                cleanedGiantString.insertBack(cleaned);
+            }
         }
 
         nav.next();
@@ -652,18 +676,26 @@ void cleanGiantString(string key,List<string> giantString) {
         nav_test.next();
     }
 
-        //o key ainda tá com a ### nele
-        cout << key << endl;
+    string cleanedKey;
+    for (char c : key) {
+        if (c != '#' and c != ' ') {
+            cleanedKey += c;
+        }
+    }
 
+    cout << cleanedKey;
+
+
+    //isso aq e so pra ver a arvore e usar o drawTree
     for (size_t i = 0; i < ht.getSize(); ++i) {
-        List<AVLTree<string, string>>& bucket = ht.table[i]; // requer que 'table' seja public/protected
+        List<AVLTree<string, string>>& bucket = ht.table[i];
 
         ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
         while (!nav.end()) {
             AVLTree<string, string> tree = nav.getCurrentItem();
 
             cout << "Subárvore no bucket " << i << ":\n";
-            drawTree<string>(tree.getRoot());  // imprime em formato dot (Graphviz)
+            drawTree<string>(tree.getRoot());
             nav.next();
         }
     }
@@ -695,19 +727,21 @@ int main() {
 //Lista de tarefas
 //1. Ler a string extra gigante (feito)
 //1.5 Limpar a string de sinais(feito)
-//2. Ler a chave (feito mas falta tirar o ###)
-//3. Adicionar a AVL na HashTable (feito?)
-//3.5 Fazer esse drawTree e generateDot funcionarem
-//4. Resolver a colisao com AVL
-//5. Fazer os a AVL estar corretamente equilibrada
-//6. Mostrar a altura da chave na AVL
-//7. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml
+//2. Ler a chave (feito)
+//3. Adicionar a AVL na HashTable (feito)
+//3.5 Fazer esse drawTree e generateDot funcionarem (feito)
+//4. Resolver a colisao com AVL (feito)
+//5. Fazer os a AVL estar corretamente equilibrada (feito)
+//6. Adicionar a busca por chave
+//7. Mostrar a altura da chave na AVL
+//8. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml
 
 //Caso teste
 /*
 When Mr. Bilbo Baggins of Bag End announced that he
 would shortly be celebrating his eleventy-first birthday
-with a party of special magnificence, there was much talk and e
-xcitement in Hobbiton.
-### Key
+with a party of special magnificence, there was much talk and excitement in Hobbiton.
+### Bilbo
 */
+
+//O eleventyfirst ta sendo considerado uma palavra so, dps ver isso
