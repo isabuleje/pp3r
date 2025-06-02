@@ -21,6 +21,7 @@ public:
     T getItem();
     Node();
     Node(T item);
+
 };
 
 template<typename T>
@@ -331,12 +332,18 @@ public:
     void preorderTraversal(Node<T>* p);
     void inorderTraversal(Node<T>* p);
     void postorderTraversal(Node<T>* p);
+    Node<T>* getRoot();
 
     //dps tirar isso aq, é so pra teste
-    void generateDot(Node<T> *root, std::ostream& out);
-    void drawTree(Node<T> *root);
+    //void generateDot(Node<T> *root, std::ostream& out);
+    //void drawTree(Node<T> *root);
 
 };
+
+template<typename Key, typename T>
+Node<T>* AVLTree<Key, T>::getRoot() {
+    return root;
+}
 
 
 
@@ -354,16 +361,21 @@ void AVLTree<Key, T>::create() {
 template<typename Key, typename T>
 void AVLTree<Key, T>::insert(Key key, T item) {
     //se o root ja existe adicionar os nodes
+    Node<T>* newNode = new Node<T>(item);
+    if (!root) {
+        root = newNode;
+        return;
+    }
     Node<T>* parent = nullptr;
     Node<T>* current = this->root;
 
     while (current != nullptr) {
         parent = current;
-        if (key == current->key) {
+        if (key == current->getItem()) {
             cout << "Elemento ja existe";
             return;
         }
-        else if (key < current->key) {
+        else if (key < current->getItem()) {
             current = current->left;
         }
         else {
@@ -371,6 +383,11 @@ void AVLTree<Key, T>::insert(Key key, T item) {
         }
     }
 
+    if (key < parent->getItem()) {
+        parent->left = newNode;
+    } else {
+        parent->right = newNode;
+    }
 
 }
 
@@ -466,7 +483,8 @@ void AVLTree<Key, T>::postorderTraversal(Node<T> *p) {
 //class HashTable
 template<typename Key, typename T>
 class HashTable {
-private:
+//DPS MUDAR PRA PUBLIC, so deixei assim pra testar um ngc
+public:
     List<AVLTree<Key,T>> *table;
 
 public:
@@ -480,6 +498,7 @@ public:
     bool search(Key key, T item);
     bool empty();
     long unsigned int hash(const Key& key) const;
+
 };
 
 
@@ -503,7 +522,16 @@ template<typename Key, typename T>
 void HashTable<Key, T>::insert(Key key, T item){
     long unsigned int index = hash(key);
 
-    table[index].insertBack(AVLTree<Key,T>());
+    ListNavigator<AVLTree<Key, T>> nav = table[index].getListNavigator();
+    while (!nav.end()) {
+        AVLTree<Key, T> tree = nav.getCurrentItem();
+        tree.insert(key, item);
+        return;
+    }
+
+    AVLTree<Key, T> newTree;
+    newTree.insert(key, item);
+    table[index].insertBack(newTree);
 }
 
 
@@ -562,6 +590,32 @@ long unsigned int HashTable<Key, T>::hash(const Key& key) const{
     return hashValue;
 }
 
+// Função para gerar a saída em formato DOT
+template <typename T>
+void generateDot(Node<T>* node, std::ostream& out) {
+    if (node == nullptr) return;
+
+    out << "    \"" << node->getItem() << "\" [label=\"" << node->getItem() << "\"];\n";
+
+    if (node->left) {
+        out << "    \"" << node->getItem() << "\" -> \"" << node->left->getItem() << "\";\n";
+        generateDot(node->left, out);
+    }
+
+    if (node->right) {
+        out << "    \"" << node->getItem() << "\" -> \"" << node->right->getItem() << "\";\n";
+        generateDot(node->right, out);
+    }
+}
+
+// Função principal para desenhar a árvore
+template <typename T>
+void drawTree(Node<T>* root) {
+    std::cout << "digraph G {\n";
+    generateDot(root, std::cout);
+    std::cout << "}\n";
+}
+
 //Tira os sinais de pontuação das strings
 void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
@@ -582,7 +636,6 @@ void cleanGiantString(string key,List<string> giantString) {
             //nao tenho ctz se e pra ser assim o insert
             //pq na minha cabeca key e item e pra ser a mesma coisa
             ht.insert(cleaned, cleaned);
-            cout << cleaned << endl;
             cleanedGiantString.insertBack(cleaned);
         }
 
@@ -602,39 +655,22 @@ void cleanGiantString(string key,List<string> giantString) {
         //o key ainda tá com a ### nele
         cout << key << endl;
 
+    for (size_t i = 0; i < ht.getSize(); ++i) {
+        List<AVLTree<string, string>>& bucket = ht.table[i]; // requer que 'table' seja public/protected
+
+        ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
+        while (!nav.end()) {
+            AVLTree<string, string> tree = nav.getCurrentItem();
+
+            cout << "Subárvore no bucket " << i << ":\n";
+            drawTree<string>(tree.getRoot());  // imprime em formato dot (Graphviz)
+            nav.next();
+        }
+    }
 }
 
 
-// Função para gerar a saída em formato DOT
-template <typename Key, typename T>
-void AVLTree<Key,T>::generateDot(Node<T>* node, std::ostream& out) {
-    if (node == nullptr) {
-        return;
-    }
 
-    // Adiciona o nó atual com a altura
-    out << "    " << node->getKey() << " [label=\"" << node->getKey() << "\\nAltura: " << height(node) << "\"];\n";
-
-    // Conecta o nó atual aos filhos
-    if (node->getLeft()) {
-        out << "    " << node->getKey() << " -> " << node->getLeft()->getKey() << ";\n";
-    }
-    if (node->getRight()) {
-        out << "    " << node->getKey() << " -> " << node->getRight()->getKey() << ";\n";
-    }
-
-    // Chama recursivamente para os filhos
-    generateDot(node->getLeft(), out);
-    generateDot(node->getRight(), out);
-}
-
-// Função principal para desenhar a árvore
-template <typename Key, typename T>
-void AVLTree<Key,T>::drawTree(Node<T>* root) {
-    std::cout << "digraph G {\n";
-    generateDot(root, std::cout);
-    std::cout << "}\n";
-}
 
 //Lê cada linha e adiciona para uma List
 int main() {
@@ -650,8 +686,9 @@ int main() {
             key = line;
             break;
         }
-
     }
+    cleanGiantString(key, giantString);
+    return 0;
 }
 
 //Pode mexer a vontade :D
