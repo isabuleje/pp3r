@@ -317,7 +317,6 @@ private:
     Node<T>* root;
 
 public:
-    AVLTree();
     void create();
     void insert(Key key, T item);
     bool remove(Key key);
@@ -343,13 +342,6 @@ public:
 template<typename Key, typename T>
 Node<T>* AVLTree<Key, T>::getRoot() {
     return root;
-}
-
-
-
-template<typename Key, typename T>
-AVLTree<Key, T>::AVLTree() {
-    root = nullptr;
 }
 
 //de acordo com o slide do prof é pra ta assim (?)
@@ -399,56 +391,89 @@ bool AVLTree<Key, T>::remove(Key key) {
 
 template<typename Key, typename T>
 bool AVLTree<Key, T>::search(Key key, T item) {
-    if (root == NULL) return NULL;
-    Node<T> *aux = root;
-    while (aux->item != key) {
-        if (key < aux->item) {
+    Node<T>* aux = root;
+    while (aux != nullptr) {
+        if (key == aux->getItem().key) {
+            item = aux->getItem();  // Encontrado
+            return true;
+        } else if (key < aux->getItem().key) {
             aux = aux->left;
-        }else {
-
+        } else {
+            aux = aux->right;
         }
     }
+    return false;
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::preorderTraversal() {
-
+    preorderTraversal(root);
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::inorderTraversal() {
-
+    inorderTraversal(root);
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::postorderTraversal() {
-
+    postorderTraversal(root);
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::insert(T item, Node<T> *p) {
     if (p == nullptr) {
         p = new Node<T>(item);
-        p->left = p->right = nullptr;
-        p->item = item;
-    } else if (item->key < p->item->key) {
-        insert(item, p->left);
-    } else if (item->key > p->item->key) {
-        insert(item, p->right);
-    } else {
-        cout <<"elementor ja existe";
-        //dps que tiver tudo certo apenas usar return
     }
+    if (item.key < p->item.key) {
+        p->left = insert(p->left, item);
+    } else if (item.key > p->item.key) {
+        p->right = insert(p->right, item);
+    } else {
+        std::cout << "Elemento já existe\n";
+    }
+
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::remove(T item, Node<T> *p) {
+    if (p == nullptr) {
+        cout << "O item nao esta na arvore";
+    }
+    else if (item.key < p->item.key) {
+        remove(p->left, item);
+    }
+    else if (item.key > p->item.key) {
+        remove(p->right, item);
+    }
+    else if (p->right == nullptr) {
+        Node<T>* aux = p;
+        p = p->left;
+        delete aux;
+    }
+    else if (p->left == nullptr) {
+        Node<T>* aux = p;
+        p = p->right;
+        delete aux;
+    }else {
+        remove(p, p->left);
+    }
 
 }
 
+//acho q esse aq ta errado, era pra ser dois node de parametro
+//dps vejo direito no slide
 template<typename Key, typename T>
 void AVLTree<Key, T>::remove_aux(T item, Node<T> *p) {
-
+    if (p->right != nullptr) {
+        remove_aux(item, p->right);
+    }
+    else {
+        item = p->item;
+        item = p;
+        p = p->left;
+        delete item;
+    }
 }
 
 //aq ta do jeito do slide do prof
@@ -467,17 +492,29 @@ void AVLTree<Key, T>::search(T item, Node<T> *p) {
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::preorderTraversal(Node<T> *p) {
-
+    if (p != nullptr) {
+        processItem(p->getItem());
+        preorderTraversal(p->left);
+        preorderTraversal(p->right);
+    }
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::inorderTraversal(Node<T> *p) {
-
+    if (p != nullptr) {
+        inorderTraversal(p->left);
+        processItem(p->getItem());
+        inorderTraversal(p->right);
+    }
 }
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::postorderTraversal(Node<T> *p) {
-
+    if (p != nullptr) {
+        postorderTraversal(p->left);
+        postorderTraversal(p->right);
+        processItem(p->getItem());
+    }
 }
 
 //class HashTable
@@ -731,7 +768,7 @@ int main() {
 //3. Adicionar a AVL na HashTable (feito)
 //3.5 Fazer esse drawTree e generateDot funcionarem (feito)
 //4. Resolver a colisao com AVL (feito)
-//5. Fazer os a AVL estar corretamente equilibrada (feito)
+//5. Fazer os a AVL estar corretamente equilibrada
 //6. Adicionar a busca por chave
 //7. Mostrar a altura da chave na AVL
 //8. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml
