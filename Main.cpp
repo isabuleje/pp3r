@@ -326,7 +326,7 @@ public:
     void postorderTraversal();
     void insert(T item, Node<T>* p);
     void remove(T item, Node<T>* p);
-    void remove_aux(T item, Node<T>* p);
+    void remove_aux(Node<T>* q, Node<T>* p);
     void search(T item, Node<T>* p);
     void preorderTraversal(Node<T>* p);
     void inorderTraversal(Node<T>* p);
@@ -464,13 +464,13 @@ void AVLTree<Key, T>::remove(T item, Node<T> *p) {
 //acho q esse aq ta errado, era pra ser dois node de parametro
 //dps vejo direito no slide
 template<typename Key, typename T>
-void AVLTree<Key, T>::remove_aux(T item, Node<T> *p) {
+void AVLTree<Key, T>::remove_aux(Node<T>* q, Node<T> *p) {
     if (p->right != nullptr) {
-        remove_aux(item, p->right);
+        remove_aux(q, p->right);
     }
     else {
-        item = p->item;
-        item = p;
+        q->getItem() = p->getItem();
+        q = p;
         p = p->left;
         delete item;
     }
@@ -771,7 +771,7 @@ int main() {
 //5. Fazer os a AVL estar corretamente equilibrada
 //6. Adicionar a busca por chave
 //7. Mostrar a altura da chave na AVL
-//8. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml
+//8. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml (feito)
 
 //Caso teste
 /*
