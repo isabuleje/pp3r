@@ -18,9 +18,12 @@ public:
     Node<T>* right;
     Node<T> *next;
     Node<T> *prev;
+    Node<T> *parent;
     T getItem();
     Node();
     Node(T item);
+    int height;
+    int balanceFactor;
 
 };
 
@@ -207,7 +210,7 @@ template<typename T> void ListNavigator<T>::next() {
 
 template<typename T> void ListNavigator<T>::reset() { current = start; }
 
-template<typename T> bool ListNavigator<T>::getCurrentItem(T &item)
+template<typename T> bool ListNavigator<T>::getCurrentItem (T &item)
 {
     if (current == nullptr) {
       return false;
@@ -319,6 +322,8 @@ private:
 public:
     void create();
     void insert(Key key, T item);
+    int getHeight(Node<T>* node) const;
+    int getHeight() const { return getHeight(root); }
     bool remove(Key key);
     bool search(Key key, T item);
     void preorderTraversal();
@@ -332,12 +337,112 @@ public:
     void inorderTraversal(Node<T>* p);
     void postorderTraversal(Node<T>* p);
     Node<T>* getRoot();
+    void rebalance(Node<T>* node);
+    void rotate(Node<T>* parent);
+    void LLR(Node<T>* parent, Node<T>* node, Node<T>* child);
+    void LRR(Node<T>* parent, Node<T>* node, Node<T>* child);
+    void RRR(Node<T>* parent, Node<T>* node, Node<T>* child);
+    void RLR(Node<T>* parent, Node<T>* node, Node<T>* child);
+    void setBalance(Node<T>* node);
 
     //dps tirar isso aq, é so pra teste
     //void generateDot(Node<T> *root, std::ostream& out);
     //void drawTree(Node<T> *root);
 
 };
+
+template <typename Key, typename T>
+int AVLTree<Key,T>::getHeight(Node<T>* node) const{
+    if (node == nullptr) return -1;
+    return 1 + max(getHeight(node->left), getHeight(node->right));
+}
+
+template<typename Key, typename T>
+void AVLTree<Key,T>::setBalance(Node<T>* node) {
+    node->balanceFactor = getHeight(node->right) - getHeight(node->left);
+}
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::rebalance(Node<T>* node){
+      while (node != nullptr){
+        setBalance(node);
+        if (node->balanceFactor >= 2 || node->balanceFactor <= -2)
+          rotate(node);
+        node = node->parent;
+      }
+}
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::rotate(Node<T>* node){
+    Node<T>* child;
+
+      if (node->balanceFactor < -1){
+        child = node->left;
+        setBalance(child);
+        if (child->balanceFactor == 1)
+          LRR(node, child, child->right);
+        else
+          LLR(node, child, child->left);
+      }
+
+      else {
+        child = node->right;
+        setBalance(child);
+        if (child->balanceFactor == -1)
+          RLR(node, child, child->left);
+        else
+          RRR(node, child, child->right);
+      }
+}
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::LLR(Node<T>* parent, Node<T>* node, Node<T>* child){
+    Node<T>* grandParent = parent->parent;
+    node->parent = grandParent;
+    Node<T>* nodeRight = node->right;
+
+    if (nodeRight != nullptr) nodeRight->parent = parent;
+        node->right = parent;
+        parent->parent = node;
+        parent->left = nodeRight;
+
+    if (grandParent == nullptr)
+        root = node;
+    else if (grandParent->left == parent)
+        grandParent->left = node;
+    else
+        grandParent->right = node;
+}
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::LRR(Node<T>* parent, Node<T>* node, Node<T>* child){
+  RRR(node, child, child->right);
+  LLR(parent, child, node);
+}
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::RRR(Node<T>* parent, Node<T>* node, Node<T>* child){
+    Node<T>* grandParent = parent->parent;
+    node->parent = grandParent;
+    Node<T>* nodeLeft = node->left;
+
+    if (nodeLeft != nullptr) nodeLeft->parent = parent;
+        node->left = parent;
+        parent->parent = node;
+        parent->right = nodeLeft;
+    if (grandParent == nullptr)
+        root = node;
+    else if (grandParent->left == parent)
+        grandParent->left = node;
+    else
+        grandParent->right = node;
+}
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::RLR(Node<T>* parent, Node<T>* node, Node<T>* child){
+    LLR(node, child, child->left);
+    RRR(parent, child, node);
+}
 
 template<typename Key, typename T>
 Node<T>* AVLTree<Key, T>::getRoot() {
@@ -375,19 +480,19 @@ void AVLTree<Key, T>::insert(Key key, T item) {
         }
     }
 
+    //se nao der certo adicioanr isso
+    //newNode->parent = parent
     if (key < parent->getItem()) {
         parent->left = newNode;
+        newNode->parent = parent;
     } else {
         parent->right = newNode;
+        newNode->parent = parent;
     }
 
+    rebalance(newNode);
 }
 
-//deleta, se true quer dizer q removeu e falso quer dizer q nunca existiur
-/*template<typename Key, typename T>
-bool AVLTree<Key, T>::remove(Key key) {
-
-}*/
 
 template<typename Key, typename T>
 bool AVLTree<Key, T>::search(Key key, T item) {
@@ -472,10 +577,15 @@ void AVLTree<Key, T>::remove_aux(Node<T>* q, Node<T> *p) {
         q->getItem() = p->getItem();
         q = p;
         p = p->left;
-        delete item;
+        delete q;
     }
 }
 
+template<typename Key, typename T>
+int height(Node<T>* current) {
+    if (current == nullptr) return 0;
+    return current->height;
+}
 //aq ta do jeito do slide do prof
 template<typename Key, typename T>
 void AVLTree<Key, T>::search(T item, Node<T> *p) {
@@ -561,6 +671,7 @@ void HashTable<Key, T>::insert(Key key, T item){
 
     ListNavigator<AVLTree<Key, T>> nav = table[index].getListNavigator();
     while (!nav.end()) {
+        //É aqui q tá com erro
         AVLTree<Key, T> tree = nav.getCurrentItem();
         tree.insert(key, item);
         return;
@@ -569,10 +680,7 @@ void HashTable<Key, T>::insert(Key key, T item){
     AVLTree<Key, T> newTree;
     newTree.insert(key, item);
     table[index].insertBack(newTree);
-}
-
-
-template<typename Key, typename T>
+}template<typename Key, typename T>
 bool HashTable<Key, T>::remove(Key key) {
     long unsigned int index = hash(key);
     List<AVLTree<Key, T>>& target = table[index];
@@ -658,6 +766,7 @@ void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
     List<string> cleanedGiantString;
     HashTable<string, string> ht(10);
+    cout << "Funcao ta funcionando" << endl;
 
     while (!nav.end()) {
         string phrase;
@@ -666,6 +775,7 @@ void cleanGiantString(string key,List<string> giantString) {
         string currentWord;
         string cleaned;
 
+        cout << "While ta rodando" << endl;
         for (char c : phrase) {
             if (c == ' ') {
                 if (!currentWord.empty()) {
@@ -675,9 +785,10 @@ void cleanGiantString(string key,List<string> giantString) {
                     }
 
                     if (!cleaned.empty()) {
+                        cout << "Ta inserindo na hashtable" << endl;
                         ht.insert(cleaned, cleaned);
                         //dps tirar esse insertback pq era so pra teste
-                        cleanedGiantString.insertBack(cleaned);
+                        //cleanedGiantString.insertBack(cleaned);
                     }
 
                     currentWord.clear();
@@ -687,6 +798,8 @@ void cleanGiantString(string key,List<string> giantString) {
             }
         }
 
+        cout << "Nao é a phrase q ta dando erro" << endl;
+
         // Ultima palavra da fraser
         if (!currentWord.empty()) {
             cleaned.clear();
@@ -695,8 +808,9 @@ void cleanGiantString(string key,List<string> giantString) {
             }
 
             if (!cleaned.empty()) {
+                cout << "Ta inserindo na hashtable" << endl;
                 ht.insert(cleaned, cleaned);
-                cleanedGiantString.insertBack(cleaned);
+                //cleanedGiantString.insertBack(cleaned);
             }
         }
 
@@ -713,18 +827,11 @@ void cleanGiantString(string key,List<string> giantString) {
         nav_test.next();
     }
 
-    string cleanedKey;
-    for (char c : key) {
-        if (c != '#' and c != ' ') {
-            cleanedKey += c;
-        }
-    }
-
-    cout << cleanedKey;
+    cout << key;
 
 
     //isso aq e so pra ver a arvore e usar o drawTree
-    for (size_t i = 0; i < ht.getSize(); ++i) {
+    /*for (size_t i = 0; i < ht.getSize(); ++i) {
         List<AVLTree<string, string>>& bucket = ht.table[i];
 
         ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
@@ -735,7 +842,7 @@ void cleanGiantString(string key,List<string> giantString) {
             drawTree<string>(tree.getRoot());
             nav.next();
         }
-    }
+    }*/
 }
 
 
@@ -747,15 +854,18 @@ int main() {
     List<string> giantString;
     string key;
 
+
     //por enquanto so reconhece quando ### esta na ultima linha sozinho e no começo
-    while (getline(cin, line)){
-        if (line.find('#')) {
-            giantString.insertBack(line);
-        }else {
-            key = line;
+    while (getline(cin, line)) {
+        if (line.rfind("###", 0) == 0) {
+            key = line.substr(3); // remove os "###"
             break;
+        } else {
+            giantString.insertBack(line);
         }
     }
+
+
     cleanGiantString(key, giantString);
     return 0;
 }
@@ -782,3 +892,5 @@ with a party of special magnificence, there was much talk and excitement in Hobb
 */
 
 //O eleventyfirst ta sendo considerado uma palavra so, dps ver isso
+
+//É O INSERT Q TA COM PROBLEMA
