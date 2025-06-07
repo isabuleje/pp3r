@@ -320,6 +320,7 @@ private:
     Node<T>* root;
 
 public:
+    AVLTree();
     void create();
     void insert(Key key, T item);
     int getHeight(Node<T>* node) const;
@@ -351,6 +352,11 @@ public:
 
 };
 
+template<typename Key, typename T>
+AVLTree<Key, T>::AVLTree() {
+    root = nullptr;
+}
+
 template <typename Key, typename T>
 int AVLTree<Key,T>::getHeight(Node<T>* node) const{
     if (node == nullptr) return -1;
@@ -364,6 +370,7 @@ void AVLTree<Key,T>::setBalance(Node<T>* node) {
 
 template <typename Key, typename T>
 void AVLTree<Key,T>::rebalance(Node<T>* node){
+    cout << "Ta balanceado" << endl;
       while (node != nullptr){
         setBalance(node);
         if (node->balanceFactor >= 2 || node->balanceFactor <= -2)
@@ -484,10 +491,8 @@ void AVLTree<Key, T>::insert(Key key, T item) {
     //newNode->parent = parent
     if (key < parent->getItem()) {
         parent->left = newNode;
-        newNode->parent = parent;
     } else {
         parent->right = newNode;
-        newNode->parent = parent;
     }
 
     rebalance(newNode);
@@ -529,15 +534,16 @@ template<typename Key, typename T>
 void AVLTree<Key, T>::insert(T item, Node<T> *p) {
     if (p == nullptr) {
         p = new Node<T>(item);
-    }
-    if (item.key < p->item.key) {
-        p->left = insert(p->left, item);
-    } else if (item.key > p->item.key) {
-        p->right = insert(p->right, item);
+        p->left = p->right = nullptr;
+        p->item = item;
+    } else if (item->key < p->item->key) {
+        insert(item, p->left);
+    } else if (item->key > p->item->key) {
+        insert(item, p->right);
     } else {
-        std::cout << "Elemento já existe\n";
+        cout <<"elementor ja existe";
+        //dps que tiver tudo certo apenas usar return
     }
-
 }
 
 template<typename Key, typename T>
@@ -670,9 +676,9 @@ void HashTable<Key, T>::insert(Key key, T item){
     long unsigned int index = hash(key);
 
     ListNavigator<AVLTree<Key, T>> nav = table[index].getListNavigator();
+
     while (!nav.end()) {
-        //É aqui q tá com erro
-        AVLTree<Key, T> tree = nav.getCurrentItem();
+        AVLTree<Key, T> tree =  nav.getCurrentItem();
         tree.insert(key, item);
         return;
     }
@@ -680,7 +686,8 @@ void HashTable<Key, T>::insert(Key key, T item){
     AVLTree<Key, T> newTree;
     newTree.insert(key, item);
     table[index].insertBack(newTree);
-}template<typename Key, typename T>
+}
+template<typename Key, typename T>
 bool HashTable<Key, T>::remove(Key key) {
     long unsigned int index = hash(key);
     List<AVLTree<Key, T>>& target = table[index];
@@ -831,7 +838,7 @@ void cleanGiantString(string key,List<string> giantString) {
 
 
     //isso aq e so pra ver a arvore e usar o drawTree
-    /*for (size_t i = 0; i < ht.getSize(); ++i) {
+    for (size_t i = 0; i < ht.getSize(); ++i) {
         List<AVLTree<string, string>>& bucket = ht.table[i];
 
         ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
@@ -842,7 +849,7 @@ void cleanGiantString(string key,List<string> giantString) {
             drawTree<string>(tree.getRoot());
             nav.next();
         }
-    }*/
+    }
 }
 
 
