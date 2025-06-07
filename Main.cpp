@@ -521,7 +521,9 @@ bool AVLTree<Key, T>::search(Key key, T item) {
     Node<T>* aux = root;
     while (aux != nullptr) {
         if (key == aux->getItem()) {
-            item = aux->getItem();  // Encontrado
+
+            int altura = getHeight(aux);
+            cout << "Altura da subarvore a partir do no '" << key << "': " << altura << std::endl;
             return true;
         } else if (key < aux->getItem()) {
             aux = aux->left;
@@ -854,7 +856,15 @@ void cleanGiantString(string key,List<string> giantString) {
         nav_test.next();
     }
 
-    cout << key;
+    //Tira espaco branco do Key
+    string cleanedKey;
+    for (char c : key) {
+        if (c != '#' and c != ' ') {
+            cleanedKey += c;
+        }
+    }
+
+    cout << cleanedKey << endl;
 
 
     //isso aq e so pra ver a arvore e usar o drawTree
@@ -862,16 +872,20 @@ void cleanGiantString(string key,List<string> giantString) {
         List<AVLTree<string, string>>& bucket = ht.table[i];
 
         ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
+
         while (!nav.end()) {
             AVLTree<string, string> tree = nav.getCurrentItem();
 
             cout << "Subárvore no bucket " << i << ":\n";
             drawTree<string>(tree.getRoot());
+
             nav.next();
         }
     }
 
-    ht.search(key,key);
+
+    ht.search(cleanedKey,cleanedKey);
+
 
 }
 
