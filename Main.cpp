@@ -322,7 +322,7 @@ private:
 public:
     AVLTree();
     void create();
-    void insert(Key key, T item);
+    void insert( Key key, T item);
     int getHeight(Node<T>* node) const;
     int getHeight() const { return getHeight(root); }
     bool remove(Key key);
@@ -427,8 +427,8 @@ void AVLTree<Key,T>::LLR(Node<T>* parent, Node<T>* node, Node<T>* child){
 
     setBalance(parent);
     setBalance(node);
-    cout << "Nova raiz da subárvore: " << node->getItem() << endl;
-    cout << "parent do antigo pai agora é: " << parent->parent->getItem() << endl;
+    cout << "Nova raiz da subarvore: " << node->getItem() << endl;
+    cout << "parent do antigo pai agora e: " << parent->parent->getItem() << endl;
 }
 
 template <typename Key, typename T>
@@ -457,8 +457,8 @@ void AVLTree<Key,T>::RRR(Node<T>* parent, Node<T>* node, Node<T>* child){
     setBalance(parent);
     setBalance(node);
 
-    cout << "Nova raiz da subárvore: " << node->getItem() << endl;
-    cout << "parent do antigo pai agora é: " << parent->parent->getItem() << endl;
+    cout << "Nova raiz da subarvore: " << node->getItem() << endl;
+    cout << "parent do antigo pai agora e: " << parent->parent->getItem() << endl;
 }
 
 template <typename Key, typename T>
@@ -479,7 +479,10 @@ void AVLTree<Key, T>::create() {
 }
 
 template<typename Key, typename T>
-void AVLTree<Key, T>::insert(Key key, T item) {
+void AVLTree<Key, T>::insert(Key key,  T item) {
+
+    cout << "Inserindo " << key << std::endl;
+
     //se o root ja existe adicionar os nodes
     Node<T>* newNode = new Node<T>(item);
     if (!root) {
@@ -492,7 +495,7 @@ void AVLTree<Key, T>::insert(Key key, T item) {
     while (current != nullptr) {
         parent = current;
         if (key == current->getItem()) {
-            cout << "Elemento ja existe";
+            cout << "Elemento ja existe" << endl;
             return;
         }
         else if (key < current->getItem()) {
@@ -503,8 +506,7 @@ void AVLTree<Key, T>::insert(Key key, T item) {
         }
     }
 
-    //se nao der certo adicioanr isso
-    newNode->parent = parent;
+    /*newNode->parent = parent;
     if (key < parent->getItem()) {
         parent->left = newNode;
     } else {
@@ -512,7 +514,7 @@ void AVLTree<Key, T>::insert(Key key, T item) {
     }
 
 
-    rebalance(newNode);
+    rebalance(newNode);*/
 }
 
 
@@ -523,7 +525,7 @@ bool AVLTree<Key, T>::search(Key key, T item) {
         if (key == aux->getItem()) {
 
             int altura = getHeight(aux);
-            cout << "Altura da subarvore a partir do no '" << key << "': " << altura << std::endl;
+            cout << "Altura da subarvore a partir do no '" << key << "': " << altura << endl;
             return true;
         } else if (key < aux->getItem()) {
             aux = aux->left;
@@ -551,6 +553,7 @@ void AVLTree<Key, T>::postorderTraversal() {
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::insert(T item, Node<T> *p) {
+    cout << "Inserindo " << item << std::endl;
     if (p == nullptr) {
         p = new Node<T>(item);
         p->left = p->right = nullptr;
@@ -560,7 +563,7 @@ void AVLTree<Key, T>::insert(T item, Node<T> *p) {
     } else if (item->key > p->item->key) {
         insert(item, p->right);
     } else {
-        cout <<"elementor ja existe";
+        cout <<"elementor ja existe" << endl;
         //dps que tiver tudo certo apenas usar return
     }
 }
@@ -794,7 +797,7 @@ void drawTree(Node<T>* root) {
 void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
     List<string> cleanedGiantString;
-    HashTable<string, string> ht(10);
+    HashTable<string, string> ht(101);
     //cout << "Funcao ta funcionando" << endl;
 
     while (!nav.end()) {
@@ -803,6 +806,7 @@ void cleanGiantString(string key,List<string> giantString) {
 
         string currentWord;
         string cleaned;
+
 
         //cout << "While ta rodando" << endl;
         for (char c : phrase) {
@@ -814,10 +818,10 @@ void cleanGiantString(string key,List<string> giantString) {
                     }
 
                     if (!cleaned.empty()) {
-                        cout << "Ta inserindo na hashtable" << endl;
+                        cout << "Ta inserindo na hashtable " << cleaned << endl;
                         ht.insert(cleaned, cleaned);
                         //dps tirar esse insertback pq era so pra teste
-                        //cleanedGiantString.insertBack(cleaned);
+                        cleanedGiantString.insertBack(cleaned);
                     }
 
                     currentWord.clear();
@@ -837,9 +841,9 @@ void cleanGiantString(string key,List<string> giantString) {
             }
 
             if (!cleaned.empty()) {
-                cout << "Ta inserindo na hashtable" << endl;
+                cout << "Ta inserindo na hashtable " << cleaned << endl;
                 ht.insert(cleaned, cleaned);
-                //cleanedGiantString.insertBack(cleaned);
+                cleanedGiantString.insertBack(cleaned);
             }
         }
 
@@ -922,10 +926,11 @@ int main() {
 //3. Adicionar a AVL na HashTable (feito)
 //3.5 Fazer esse drawTree e generateDot funcionarem (feito)
 //4. Resolver a colisao com AVL (feito)
-//5. Fazer os a AVL estar corretamente equilibrada
-//6. Adicionar a busca por chave
-//7. Mostrar a altura da chave na AVL
+//5. Fazer os a AVL estar corretamente equilibrada (feito)
+//6. Adicionar a busca por chave (feito)
+//7. Mostrar a altura da chave na AVL (feito)
 //8. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml (feito)
+//9. Ler todo o arquivo do cap 1 D:
 
 //Caso teste
 /*
