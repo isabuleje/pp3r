@@ -370,12 +370,13 @@ void AVLTree<Key,T>::setBalance(Node<T>* node) {
 
 template <typename Key, typename T>
 void AVLTree<Key,T>::rebalance(Node<T>* node){
-    cout << "Ta balanceado" << endl;
+    cout << "Rebalanceando a partir de: " << node->getItem()<< endl;
       while (node != nullptr){
         setBalance(node);
-        if (node->balanceFactor >= 2 || node->balanceFactor <= -2)
-          rotate(node);
-        node = node->parent;
+        if (node->balanceFactor >= 2 || node->balanceFactor <= -2) {
+            rotate(node);
+        }
+          node = node->parent;
       }
 }
 
@@ -386,19 +387,23 @@ void AVLTree<Key,T>::rotate(Node<T>* node){
       if (node->balanceFactor < -1){
         child = node->left;
         setBalance(child);
-        if (child->balanceFactor == 1)
-          LRR(node, child, child->right);
-        else
-          LLR(node, child, child->left);
+        if (child->balanceFactor == 1) {
+            LRR(node, child, child->right);
+        }
+        else {
+            LLR(node, child, child->left);
+        }
       }
 
       else {
         child = node->right;
         setBalance(child);
-        if (child->balanceFactor == -1)
-          RLR(node, child, child->left);
-        else
-          RRR(node, child, child->right);
+        if (child->balanceFactor == -1) {
+            RLR(node, child, child->left);
+        }
+        else {
+            RRR(node, child, child->right);
+        }
       }
 }
 
@@ -409,9 +414,9 @@ void AVLTree<Key,T>::LLR(Node<T>* parent, Node<T>* node, Node<T>* child){
     Node<T>* nodeRight = node->right;
 
     if (nodeRight != nullptr) nodeRight->parent = parent;
-        node->right = parent;
-        parent->parent = node;
-        parent->left = nodeRight;
+    node->right = parent;
+    parent->parent = node;
+    parent->left = nodeRight;
 
     if (grandParent == nullptr)
         root = node;
@@ -419,6 +424,11 @@ void AVLTree<Key,T>::LLR(Node<T>* parent, Node<T>* node, Node<T>* child){
         grandParent->left = node;
     else
         grandParent->right = node;
+
+    setBalance(parent);
+    setBalance(node);
+    cout << "Nova raiz da subárvore: " << node->getItem() << endl;
+    cout << "parent do antigo pai agora é: " << parent->parent->getItem() << endl;
 }
 
 template <typename Key, typename T>
@@ -434,15 +444,21 @@ void AVLTree<Key,T>::RRR(Node<T>* parent, Node<T>* node, Node<T>* child){
     Node<T>* nodeLeft = node->left;
 
     if (nodeLeft != nullptr) nodeLeft->parent = parent;
-        node->left = parent;
-        parent->parent = node;
-        parent->right = nodeLeft;
+    node->left = parent;
+    parent->parent = node;
+    parent->right = nodeLeft;
     if (grandParent == nullptr)
         root = node;
     else if (grandParent->left == parent)
         grandParent->left = node;
     else
         grandParent->right = node;
+
+    setBalance(parent);
+    setBalance(node);
+
+    cout << "Nova raiz da subárvore: " << node->getItem() << endl;
+    cout << "parent do antigo pai agora é: " << parent->parent->getItem() << endl;
 }
 
 template <typename Key, typename T>
@@ -488,12 +504,13 @@ void AVLTree<Key, T>::insert(Key key, T item) {
     }
 
     //se nao der certo adicioanr isso
-    //newNode->parent = parent
+    newNode->parent = parent;
     if (key < parent->getItem()) {
         parent->left = newNode;
     } else {
         parent->right = newNode;
     }
+
 
     rebalance(newNode);
 }
@@ -503,10 +520,10 @@ template<typename Key, typename T>
 bool AVLTree<Key, T>::search(Key key, T item) {
     Node<T>* aux = root;
     while (aux != nullptr) {
-        if (key == aux->getItem().key) {
+        if (key == aux->getItem()) {
             item = aux->getItem();  // Encontrado
             return true;
-        } else if (key < aux->getItem().key) {
+        } else if (key < aux->getItem()) {
             aux = aux->left;
         } else {
             aux = aux->right;
@@ -705,18 +722,21 @@ bool HashTable<Key, T>::remove(Key key) {
 template<typename Key, typename T>
 bool HashTable<Key, T>::search(Key key, T item){
     long unsigned int index = hash(key);
-    const List<AVLTree<Key, T>>& bucket = table[index];
-    ListNavigator<AVLTree<Key, T>> nav = bucket.getListNavigator();
+
+    ListNavigator<AVLTree<Key, T>> nav = table[index].getListNavigator();
+
     while (!nav.end()) {
-        const AVLTree<Key, T>& p = nav.getCurrentItem();
-        if (p.getFirst() == key && p.getLast() == item) {
-            cout << item << " found at index " << index << endl;
+        AVLTree<Key, T> tree =  nav.getCurrentItem();
+        if (tree.search(key, item)) {
+            cout << "Item encontrado: " << key << endl;
             return true;
         }
         nav.next();
     }
-    cout << key << " not found" << endl;
+
+    cout << "Item nao encontrado: " << item << endl;
     return false;
+
 }
 
 template<typename Key, typename T>
@@ -773,7 +793,7 @@ void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
     List<string> cleanedGiantString;
     HashTable<string, string> ht(10);
-    cout << "Funcao ta funcionando" << endl;
+    //cout << "Funcao ta funcionando" << endl;
 
     while (!nav.end()) {
         string phrase;
@@ -782,7 +802,7 @@ void cleanGiantString(string key,List<string> giantString) {
         string currentWord;
         string cleaned;
 
-        cout << "While ta rodando" << endl;
+        //cout << "While ta rodando" << endl;
         for (char c : phrase) {
             if (c == ' ') {
                 if (!currentWord.empty()) {
@@ -805,7 +825,7 @@ void cleanGiantString(string key,List<string> giantString) {
             }
         }
 
-        cout << "Nao é a phrase q ta dando erro" << endl;
+        //cout << "Nao é a phrase q ta dando erro" << endl;
 
         // Ultima palavra da fraser
         if (!currentWord.empty()) {
@@ -850,6 +870,9 @@ void cleanGiantString(string key,List<string> giantString) {
             nav.next();
         }
     }
+
+    ht.search(key,key);
+
 }
 
 
@@ -893,11 +916,7 @@ int main() {
 //Caso teste
 /*
 When Mr. Bilbo Baggins of Bag End announced that he
-would shortly be celebrating his eleventy-first birthday
-with a party of special magnificence, there was much talk and excitement in Hobbiton.
 ### Bilbo
 */
 
 //O eleventyfirst ta sendo considerado uma palavra so, dps ver isso
-
-//É O INSERT Q TA COM PROBLEMA
