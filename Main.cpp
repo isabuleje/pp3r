@@ -31,6 +31,11 @@ template<typename T>
 Node<T>::Node() {
     next = nullptr;
     prev = nullptr;
+    left = nullptr; 
+    right = nullptr; 
+    parent = nullptr; 
+    height = 0; 
+    balanceFactor = 0; 
 }
 
 template<typename T>
@@ -38,6 +43,11 @@ Node<T>::Node(T item) {
     this->item = item;
     next = nullptr;
     prev = nullptr;
+     left = nullptr; 
+    right = nullptr; 
+    parent = nullptr; 
+    height = 0; 
+    balanceFactor = 0; 
 }
 
 template<typename T> T Node<T>::getItem() { return item; }
@@ -519,7 +529,7 @@ bool AVLTree<Key, T>::search(Key key, T item) {
     while (aux != nullptr) {
         if (key == aux->getItem()) {
 
-            int altura = getHeight(aux);
+            int altura = getHeight();
             cout << "Altura da subarvore a partir do no '" << key << "': " << altura << endl;
             return true;
         } else if (key < aux->getItem()) {
@@ -691,12 +701,30 @@ long unsigned int HashTable<Key, T>::getSize() const{
 template<typename Key, typename T>
 void HashTable<Key, T>::insert(Key key, T item){
     long unsigned int index = hash(key);
+    List<AVLTree<Key, T>>& bucket = table[index];
+    ListNavigator<AVLTree<Key, T>> nav = bucket.getListNavigator();
 
-    ListNavigator<AVLTree<Key, T>> nav = table[index].getListNavigator();
+    int pos = 0;
+    bool found = false;
 
     while (!nav.end()) {
         AVLTree<Key, T> tree =  nav.getCurrentItem();
         tree.insert(key, item);
+        List<AVLTree<Key, T>> tempList;
+        ListNavigator<AVLTree<Key, T>> tempNav = bucket.getListNavigator();
+        int i = 0;
+        while (!tempNav.end()) {
+            AVLTree<Key, T> t = tempNav.getCurrentItem();
+            if (i == pos) {
+                tempList.insertBack(tree); // coloca a árvore modificada
+            } else {
+                tempList.insertBack(t); // copia as outras
+            }
+            tempNav.next();
+            i++;
+        }
+
+        bucket = tempList;
         return;
     }
 
