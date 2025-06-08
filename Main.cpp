@@ -359,7 +359,9 @@ AVLTree<Key, T>::AVLTree() {
 
 template <typename Key, typename T>
 int AVLTree<Key,T>::getHeight(Node<T>* node) const{
-    if (node == nullptr) return -1;
+    if (!node) {
+        return -1;
+    }
     return 1 + max(getHeight(node->left), getHeight(node->right));
 }
 
@@ -371,13 +373,13 @@ void AVLTree<Key,T>::setBalance(Node<T>* node) {
 template <typename Key, typename T>
 void AVLTree<Key,T>::rebalance(Node<T>* node){
     cout << "Rebalanceando a partir de: " << node->getItem()<< endl;
-      while (node != nullptr){
+    while (node != nullptr) {
         setBalance(node);
         if (node->balanceFactor >= 2 || node->balanceFactor <= -2) {
             rotate(node);
         }
-          node = node->parent;
-      }
+        node = node->parent;
+    }
 }
 
 template <typename Key, typename T>
@@ -427,8 +429,6 @@ void AVLTree<Key,T>::LLR(Node<T>* parent, Node<T>* node, Node<T>* child){
 
     setBalance(parent);
     setBalance(node);
-    cout << "Nova raiz da subarvore: " << node->getItem() << endl;
-    cout << "parent do antigo pai agora e: " << parent->parent->getItem() << endl;
 }
 
 template <typename Key, typename T>
@@ -480,15 +480,17 @@ void AVLTree<Key, T>::create() {
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::insert(Key key,  T item) {
-
-    cout << "Inserindo " << key << std::endl;
+    //cout << "Inserindo " << key << std::endl;
 
     //se o root ja existe adicionar os nodes
     Node<T>* newNode = new Node<T>(item);
+    newNode->left = newNode->right = nullptr;
+    newNode->parent = nullptr;
     if (!root) {
         root = newNode;
         return;
     }
+
     Node<T>* parent = nullptr;
     Node<T>* current = this->root;
 
@@ -506,15 +508,16 @@ void AVLTree<Key, T>::insert(Key key,  T item) {
         }
     }
 
-    /*newNode->parent = parent;
+    newNode->parent = parent;
     if (key < parent->getItem()) {
         parent->left = newNode;
+
     } else {
         parent->right = newNode;
     }
 
 
-    rebalance(newNode);*/
+    rebalance(newNode);
 }
 
 
@@ -797,7 +800,7 @@ void drawTree(Node<T>* root) {
 void cleanGiantString(string key,List<string> giantString) {
     ListNavigator<string> nav = giantString.getListNavigator();
     List<string> cleanedGiantString;
-    HashTable<string, string> ht(101);
+    HashTable<string, string> ht(151);
     //cout << "Funcao ta funcionando" << endl;
 
     while (!nav.end()) {
@@ -821,7 +824,7 @@ void cleanGiantString(string key,List<string> giantString) {
                         cout << "Ta inserindo na hashtable " << cleaned << endl;
                         ht.insert(cleaned, cleaned);
                         //dps tirar esse insertback pq era so pra teste
-                        cleanedGiantString.insertBack(cleaned);
+                        //cleanedGiantString.insertBack(cleaned);
                     }
 
                     currentWord.clear();
@@ -843,7 +846,7 @@ void cleanGiantString(string key,List<string> giantString) {
             if (!cleaned.empty()) {
                 cout << "Ta inserindo na hashtable " << cleaned << endl;
                 ht.insert(cleaned, cleaned);
-                cleanedGiantString.insertBack(cleaned);
+                //cleanedGiantString.insertBack(cleaned);
             }
         }
 
