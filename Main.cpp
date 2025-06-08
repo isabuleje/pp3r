@@ -340,11 +340,10 @@ public:
     Node<T>* getRoot();
     void rebalance(Node<T>* node);
     void rotate(Node<T>* parent);
-    void LLR(Node<T>* parent, Node<T>* node, Node<T>* child);
-    void LRR(Node<T>* parent, Node<T>* node, Node<T>* child);
-    void RRR(Node<T>* parent, Node<T>* node, Node<T>* child);
-    void RLR(Node<T>* parent, Node<T>* node, Node<T>* child);
+    void rotateRight(Node<T>* node);
+    void rotateLeft(Node<T>* node);
     void setBalance(Node<T>* node);
+    void updateHeight(Node<T>* node);
 
     //dps tirar isso aq, é so pra teste
     //void generateDot(Node<T> *root, std::ostream& out);
@@ -359,114 +358,107 @@ AVLTree<Key, T>::AVLTree() {
 
 template <typename Key, typename T>
 int AVLTree<Key,T>::getHeight(Node<T>* node) const{
-    if (!node) {
-        return -1;
+    return node ? node->height : -1;
+}
+
+template <typename Key, typename T>
+void AVLTree<Key, T>::updateHeight(Node<T>* node) {
+    if (node) {
+        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+        node->balanceFactor = getHeight(node->right) - getHeight(node->left);
     }
-    return 1 + max(getHeight(node->left), getHeight(node->right));
 }
 
 template<typename Key, typename T>
 void AVLTree<Key,T>::setBalance(Node<T>* node) {
-    node->balanceFactor = getHeight(node->right) - getHeight(node->left);
-}
-
-template <typename Key, typename T>
-void AVLTree<Key,T>::rebalance(Node<T>* node){
-    cout << "Rebalanceando a partir de: " << node->getItem()<< endl;
-    while (node != nullptr) {
-        setBalance(node);
-        if (node->balanceFactor >= 2 || node->balanceFactor <= -2) {
-            rotate(node);
-        }
-        node = node->parent;
+    if (node) {
+        node->balanceFactor = getHeight(node->right) - getHeight(node->left);
     }
 }
 
 template <typename Key, typename T>
-void AVLTree<Key,T>::rotate(Node<T>* node){
-    Node<T>* child;
+void AVLTree<Key,T>::rebalance(Node<T>* node){
+    while (node != nullptr) {
+        updateHeight(node);
 
-      if (node->balanceFactor < -1){
-        child = node->left;
-        setBalance(child);
-        if (child->balanceFactor == 1) {
-            LRR(node, child, child->right);
+        if (node->balanceFactor < -1) {
+            if (node->left->balanceFactor <= 0) {
+                //Esquerda esquerda
+                rotateRight(node);
+            } else {
+                rotateLeft(node->left);
+                //Esquerda direita
+                rotateRight(node);
+            }
+        } else if (node->balanceFactor > 1) {
+            if (node->right->balanceFactor >= 0) {
+                //direita direita
+                rotateLeft(node);
+            } else {
+                //direita esquerda
+                rotateRight(node->right);
+                rotateLeft(node);
+            }
         }
-        else {
-            LLR(node, child, child->left);
-        }
-      }
 
-      else {
-        child = node->right;
-        setBalance(child);
-        if (child->balanceFactor == -1) {
-            RLR(node, child, child->left);
-        }
-        else {
-            RRR(node, child, child->right);
-        }
-      }
+        node = node->parent;
+    }
+}
+
+
+template <typename Key, typename T>
+void AVLTree<Key,T>::rotateLeft(Node<T>* node) {
+    Node<T>* newRoot = node->right;
+    node->right = newRoot->left;
+
+    if (newRoot->left) {
+        newRoot->left->parent = node;
+    }
+
+    newRoot->parent = node->parent;
+
+    if (!node->parent) {
+        root = newRoot;
+    }
+    else if (node == node->parent->left) {
+        node->parent->left = newRoot;
+    }
+    else {
+        node->parent->right = newRoot;
+    }
+    newRoot->left = node;
+    node->parent = newRoot;
+
+    updateHeight(node);
+    updateHeight(newRoot);
 }
 
 template <typename Key, typename T>
-void AVLTree<Key,T>::LLR(Node<T>* parent, Node<T>* node, Node<T>* child){
-    Node<T>* grandParent = parent->parent;
-    node->parent = grandParent;
-    Node<T>* nodeRight = node->right;
+void AVLTree<Key,T>::rotateRight(Node<T>* node) {
+    Node<T>* newRoot = node->left;
+    node->left = newRoot->right;
 
-    if (nodeRight != nullptr) nodeRight->parent = parent;
-    node->right = parent;
-    parent->parent = node;
-    parent->left = nodeRight;
+    if (newRoot->right) {
+        newRoot->right->parent = node;
+    }
 
-    if (grandParent == nullptr)
-        root = node;
-    else if (grandParent->left == parent)
-        grandParent->left = node;
-    else
-        grandParent->right = node;
+    newRoot->parent = node->parent;
 
-    setBalance(parent);
-    setBalance(node);
+    if (!node->parent) {
+        root = newRoot;
+    }
+    else if (node == node->parent->right) {
+        node->parent->right = newRoot;
+    }
+    else {
+        node->parent->left = newRoot;
+    }
+    newRoot->right = node;
+    node->parent = newRoot;
+
+    updateHeight(node);
+    updateHeight(newRoot);
 }
-
-template <typename Key, typename T>
-void AVLTree<Key,T>::LRR(Node<T>* parent, Node<T>* node, Node<T>* child){
-  RRR(node, child, child->right);
-  LLR(parent, child, node);
-}
-
-template <typename Key, typename T>
-void AVLTree<Key,T>::RRR(Node<T>* parent, Node<T>* node, Node<T>* child){
-    Node<T>* grandParent = parent->parent;
-    node->parent = grandParent;
-    Node<T>* nodeLeft = node->left;
-
-    if (nodeLeft != nullptr) nodeLeft->parent = parent;
-    node->left = parent;
-    parent->parent = node;
-    parent->right = nodeLeft;
-    if (grandParent == nullptr)
-        root = node;
-    else if (grandParent->left == parent)
-        grandParent->left = node;
-    else
-        grandParent->right = node;
-
-    setBalance(parent);
-    setBalance(node);
-
-    cout << "Nova raiz da subarvore: " << node->getItem() << endl;
-    cout << "parent do antigo pai agora e: " << parent->parent->getItem() << endl;
-}
-
-template <typename Key, typename T>
-void AVLTree<Key,T>::RLR(Node<T>* parent, Node<T>* node, Node<T>* child){
-    LLR(node, child, child->left);
-    RRR(parent, child, node);
-}
-
 template<typename Key, typename T>
 Node<T>* AVLTree<Key, T>::getRoot() {
     return root;
@@ -497,7 +489,7 @@ void AVLTree<Key, T>::insert(Key key,  T item) {
     while (current != nullptr) {
         parent = current;
         if (key == current->getItem()) {
-            cout << "Elemento ja existe" << endl;
+            //cout << "Elemento ja existe" << endl;
             return;
         }
         else if (key < current->getItem()) {
@@ -821,7 +813,7 @@ void cleanGiantString(string key,List<string> giantString) {
                     }
 
                     if (!cleaned.empty()) {
-                        cout << "Ta inserindo na hashtable " << cleaned << endl;
+                        //cout << "Ta inserindo na hashtable " << cleaned << endl;
                         ht.insert(cleaned, cleaned);
                         //dps tirar esse insertback pq era so pra teste
                         //cleanedGiantString.insertBack(cleaned);
@@ -844,7 +836,7 @@ void cleanGiantString(string key,List<string> giantString) {
             }
 
             if (!cleaned.empty()) {
-                cout << "Ta inserindo na hashtable " << cleaned << endl;
+                //cout << "Ta inserindo na hashtable " << cleaned << endl;
                 ht.insert(cleaned, cleaned);
                 //cleanedGiantString.insertBack(cleaned);
             }
