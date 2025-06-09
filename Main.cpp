@@ -530,7 +530,7 @@ bool AVLTree<Key, T>::search(Key key, T item) {
         if (key == aux->getItem()) {
 
             int altura = getHeight();
-            cout << "Altura da subarvore a partir do no '" << key << "': " << altura << endl;
+            cout << key << " - " << altura << endl;
             return true;
         } else if (key < aux->getItem()) {
             aux = aux->left;
@@ -756,13 +756,12 @@ bool HashTable<Key, T>::search(Key key, T item){
     while (!nav.end()) {
         AVLTree<Key, T> tree =  nav.getCurrentItem();
         if (tree.search(key, item)) {
-            cout << "Item encontrado: " << key << endl;
             return true;
         }
         nav.next();
     }
 
-    cout << "Item nao encontrado: " << item << endl;
+    cout << item <<" - "<< "Nao encontrado" << endl;
     return false;
 
 }
@@ -891,11 +890,11 @@ void cleanGiantString(string key,List<string> giantString) {
         }
     }
 
-    cout << cleanedKey << endl;
+    //cout << cleanedKey << endl;
 
 
     //isso aq e so pra ver a arvore e usar o drawTree
-    for (size_t i = 0; i < ht.getSize(); ++i) {
+    /*for (size_t i = 0; i < ht.getSize(); ++i) {
         List<AVLTree<string, string>>& bucket = ht.table[i];
 
         ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
@@ -908,7 +907,7 @@ void cleanGiantString(string key,List<string> giantString) {
 
             nav.next();
         }
-    }
+    }*/
 
 
     ht.search(cleanedKey,cleanedKey);
