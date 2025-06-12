@@ -360,7 +360,6 @@ AVLTree<Key, T>::AVLTree() {
 
 template <typename Key, typename T>
 int AVLTree<Key,T>::getHeight(Node<T>* node) const{
-    //quando a arvore n possue o root a altura é 0
     if (node == nullptr) {
         return 0;
     }
@@ -703,7 +702,7 @@ void HashTable<Key, T>::insert(Key key, T item){
         while (!tempNav.end()) {
             AVLTree<Key, T> t = tempNav.getCurrentItem();
             if (i == pos) {
-                tempList.insertBack(tree); // coloca a árvore modificada
+                tempList.insertBack(tree); // coloca a arvore modificada
             } else {
                 tempList.insertBack(t); // copia as outras
             }
@@ -773,37 +772,11 @@ size_t HashTable<Key,T>::hash(const string& key, size_t m) {
     size_t n = key.length();
     for (size_t i = 0; i < n; ++i) {
         hashValue += key[i] * static_cast<size_t>(std::pow(128, n - i - 1));
-        hashValue %= m; // Aplica o módulo a cada iteração
+        hashValue %= m;
     }
     return hashValue;
 }
 
-
-// Função para gerar a saída em formato DOT
-template <typename T>
-void generateDot(Node<T>* node, std::ostream& out) {
-    if (node == nullptr) return;
-
-    out << "    \"" << node->getItem() << "\" [label=\"" << node->getItem() << "\"];\n";
-
-    if (node->left) {
-        out << "    \"" << node->getItem() << "\" -> \"" << node->left->getItem() << "\";\n";
-        generateDot(node->left, out);
-    }
-
-    if (node->right) {
-        out << "    \"" << node->getItem() << "\" -> \"" << node->right->getItem() << "\";\n";
-        generateDot(node->right, out);
-    }
-}
-
-// Função principal para desenhar a árvore
-template <typename T>
-void drawTree(Node<T>* root) {
-    cout << "digraph G {\n";
-    generateDot(root, std::cout);
-    cout << "}\n";
-}
 
 //Limpa as acentuacoes das palavras
 HashTable<string,string> cleanWords(List<string> cleanedGiantString) {
@@ -871,25 +844,7 @@ void searcher(string key,List<string> giantString) {
             cleanedKey += c;
         }
     }
-
-    for (size_t i = 0; i < ht.getSize(); ++i) {
-        List<AVLTree<string, string>>& bucket = ht.table[i];
-
-        ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
-
-        while (!nav.end()) {
-            AVLTree<string, string> tree = nav.getCurrentItem();
-
-            cout << "Subárvore no bucket " << i << ":\n";
-            drawTree<string>(tree.getRoot());
-
-            nav.next();
-        }
-    }
-
     ht.search(cleanedKey, cleanedKey);
-
-
 }
 
 
@@ -900,7 +855,7 @@ int main() {
 
     while (getline(cin, line)) {
         if (line.rfind("###", 0) == 0) {
-            key = line.substr(3); // remove os "###"
+            key = line.substr(3);
             break;
         } else {
             giantString.insertBack(line);
