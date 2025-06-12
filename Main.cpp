@@ -3,8 +3,6 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
-#include <list>
-
 
 using namespace std;
 
@@ -332,10 +330,9 @@ private:
 public:
     AVLTree();
     void create();
-    void insert( Key key, T item);
+    void insert(Key key, T item);
     int getHeight(Node<T>* node) const;
     int getHeight() const { return getHeight(root); }
-    bool remove(Key key);
     bool search(Key key, T item);
     void preorderTraversal();
     void inorderTraversal();
@@ -349,15 +346,10 @@ public:
     void postorderTraversal(Node<T>* p);
     Node<T>* getRoot();
     void rebalance(Node<T>* node);
-    void rotate(Node<T>* parent);
     void rotateRight(Node<T>* node);
     void rotateLeft(Node<T>* node);
     void setBalance(Node<T>* node);
     void updateHeight(Node<T>* node);
-
-    //dps tirar isso aq, é so pra teste
-    //void generateDot(Node<T> *root, std::ostream& out);
-    //void drawTree(Node<T> *root);
 
 };
 
@@ -368,7 +360,11 @@ AVLTree<Key, T>::AVLTree() {
 
 template <typename Key, typename T>
 int AVLTree<Key,T>::getHeight(Node<T>* node) const{
-    return node ? node->height : -1;
+    //quando a arvore n possue o root a altura é 0
+    if (node == nullptr) {
+        return 0;
+    }
+    return node->height;
 }
 
 template <typename Key, typename T>
@@ -393,11 +389,11 @@ void AVLTree<Key,T>::rebalance(Node<T>* node){
 
         if (node->balanceFactor < -1) {
             if (node->left->balanceFactor <= 0) {
-                //Esquerda esquerda
+                //esquerda esquerda
                 rotateRight(node);
             } else {
                 rotateLeft(node->left);
-                //Esquerda direita
+                //esquerda direita
                 rotateRight(node);
             }
         } else if (node->balanceFactor > 1) {
@@ -410,7 +406,6 @@ void AVLTree<Key,T>::rebalance(Node<T>* node){
                 rotateLeft(node);
             }
         }
-
         node = node->parent;
     }
 }
@@ -474,7 +469,6 @@ Node<T>* AVLTree<Key, T>::getRoot() {
     return root;
 }
 
-//de acordo com o slide do prof é pra ta assim (?)
 template<typename Key, typename T>
 void AVLTree<Key, T>::create() {
     root = nullptr;
@@ -482,9 +476,6 @@ void AVLTree<Key, T>::create() {
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::insert(Key key,  T item) {
-    //cout << "Inserindo " << key << std::endl;
-
-    //se o root ja existe adicionar os nodes
     Node<T>* newNode = new Node<T>(item);
     newNode->left = newNode->right = nullptr;
     newNode->parent = nullptr;
@@ -499,7 +490,6 @@ void AVLTree<Key, T>::insert(Key key,  T item) {
     while (current != nullptr) {
         parent = current;
         if (key == current->getItem()) {
-            //cout << "Elemento ja existe" << endl;
             return;
         }
         else if (key < current->getItem()) {
@@ -528,9 +518,8 @@ bool AVLTree<Key, T>::search(Key key, T item) {
     Node<T>* aux = root;
     while (aux != nullptr) {
         if (key == aux->getItem()) {
-
-            int altura = getHeight();
-            cout << key << " - " << altura << endl;
+            int height = getHeight();
+            cout << key << " - " << height << endl;
             return true;
         } else if (key < aux->getItem()) {
             aux = aux->left;
@@ -558,7 +547,6 @@ void AVLTree<Key, T>::postorderTraversal() {
 
 template<typename Key, typename T>
 void AVLTree<Key, T>::insert(T item, Node<T> *p) {
-    cout << "Inserindo " << item << std::endl;
     if (p == nullptr) {
         p = new Node<T>(item);
         p->left = p->right = nullptr;
@@ -568,8 +556,7 @@ void AVLTree<Key, T>::insert(T item, Node<T> *p) {
     } else if (item->key > p->item->key) {
         insert(item, p->right);
     } else {
-        cout <<"elementor ja existe" << endl;
-        //dps que tiver tudo certo apenas usar return
+        return;
     }
 }
 
@@ -599,8 +586,7 @@ void AVLTree<Key, T>::remove(T item, Node<T> *p) {
 
 }
 
-//acho q esse aq ta errado, era pra ser dois node de parametro
-//dps vejo direito no slide
+
 template<typename Key, typename T>
 void AVLTree<Key, T>::remove_aux(Node<T>* q, Node<T> *p) {
     if (p->right != nullptr) {
@@ -616,10 +602,13 @@ void AVLTree<Key, T>::remove_aux(Node<T>* q, Node<T> *p) {
 
 template<typename Key, typename T>
 int height(Node<T>* current) {
-    if (current == nullptr) return 0;
+    if (current == nullptr) {
+        return 0;
+    }
     return current->height;
 }
-//aq ta do jeito do slide do prof
+
+
 template<typename Key, typename T>
 void AVLTree<Key, T>::search(T item, Node<T> *p) {
     if (p == nullptr) {
@@ -663,7 +652,6 @@ void AVLTree<Key, T>::postorderTraversal(Node<T> *p) {
 //class HashTable
 template<typename Key, typename T>
 class HashTable {
-//DPS MUDAR PRA PUBLIC, so deixei assim pra testar um ngc
 public:
     List<AVLTree<Key,T>> *table;
 
@@ -677,7 +665,7 @@ public:
     bool remove(Key key);
     bool search(Key key, T item);
     bool empty();
-    long unsigned int hash(const Key& key) const;
+    size_t hash(const string& key, size_t m);
 
 };
 
@@ -700,12 +688,11 @@ long unsigned int HashTable<Key, T>::getSize() const{
 
 template<typename Key, typename T>
 void HashTable<Key, T>::insert(Key key, T item){
-    long unsigned int index = hash(key);
+    long unsigned int index = hash(key, this->size);
     List<AVLTree<Key, T>>& bucket = table[index];
     ListNavigator<AVLTree<Key, T>> nav = bucket.getListNavigator();
 
     int pos = 0;
-    bool found = false;
 
     while (!nav.end()) {
         AVLTree<Key, T> tree =  nav.getCurrentItem();
@@ -732,6 +719,7 @@ void HashTable<Key, T>::insert(Key key, T item){
     newTree.insert(key, item);
     table[index].insertBack(newTree);
 }
+
 template<typename Key, typename T>
 bool HashTable<Key, T>::remove(Key key) {
     long unsigned int index = hash(key);
@@ -749,7 +737,7 @@ bool HashTable<Key, T>::remove(Key key) {
 
 template<typename Key, typename T>
 bool HashTable<Key, T>::search(Key key, T item){
-    long unsigned int index = hash(key);
+    long unsigned int index = hash(key, this->size);
 
     ListNavigator<AVLTree<Key, T>> nav = table[index].getListNavigator();
 
@@ -779,15 +767,17 @@ bool HashTable<Key, T>::empty(){
 
 
 template<typename Key, typename T>
-long unsigned int HashTable<Key, T>::hash(const Key& key) const{
-    long unsigned int hashValue = 0;
-    long unsigned int n = key.length();
+
+size_t HashTable<Key,T>::hash(const string& key, size_t m) {
+    size_t hashValue = 0;
+    size_t n = key.length();
     for (size_t i = 0; i < n; ++i) {
-        hashValue += key[i] * static_cast<size_t>(pow(128, n - i - 1));
-        hashValue %= this->getSize();
+        hashValue += key[i] * static_cast<size_t>(std::pow(128, n - i - 1));
+        hashValue %= m; // Aplica o módulo a cada iteração
     }
     return hashValue;
 }
+
 
 // Função para gerar a saída em formato DOT
 template <typename T>
@@ -815,74 +805,66 @@ void drawTree(Node<T>* root) {
     cout << "}\n";
 }
 
-//Tira os sinais de pontuação das strings
-void cleanGiantString(string key,List<string> giantString) {
-    ListNavigator<string> nav = giantString.getListNavigator();
-    List<string> cleanedGiantString;
+//Limpa as acentuacoes das palavras
+HashTable<string,string> cleanWords(List<string> cleanedGiantString) {
     HashTable<string, string> ht(151);
-    //cout << "Funcao ta funcionando" << endl;
+    ListNavigator<string> nav = cleanedGiantString.getListNavigator();
 
     while (!nav.end()) {
-        string phrase;
-        nav.getCurrentItem(phrase);
+        string word = nav.getCurrentItem();
+        string cleaned = "";
 
-        string currentWord;
-        string cleaned;
-
-
-        //cout << "While ta rodando" << endl;
-        for (char c : phrase) {
-            if (c == ' ') {
-                if (!currentWord.empty()) {
-                    cleaned.clear();
-                    for (char ch : currentWord) {
-                        if (!ispunct(ch)) cleaned += ch;
-                    }
-
-                    if (!cleaned.empty()) {
-                        //cout << "Ta inserindo na hashtable " << cleaned << endl;
-                        ht.insert(cleaned, cleaned);
-                        //dps tirar esse insertback pq era so pra teste
-                        //cleanedGiantString.insertBack(cleaned);
-                    }
-
-                    currentWord.clear();
-                }
-            } else {
-                currentWord += c;
+        for (char c : word) {
+            if (!ispunct(c)) {
+                cleaned += c;
             }
         }
 
-        //cout << "Nao é a phrase q ta dando erro" << endl;
-
-        // Ultima palavra da fraser
-        if (!currentWord.empty()) {
-            cleaned.clear();
-            for (char ch : currentWord) {
-                if (!ispunct(ch)) cleaned += ch;
-            }
-
-            if (!cleaned.empty()) {
-                //cout << "Ta inserindo na hashtable " << cleaned << endl;
-                ht.insert(cleaned, cleaned);
-                //cleanedGiantString.insertBack(cleaned);
-            }
+        if (!cleaned.empty()) {
+            ht.insert(cleaned, cleaned);
         }
 
         nav.next();
     }
 
+    return ht;
+}
 
-    //aqui so pra teste
-    ListNavigator<string> nav_test = cleanedGiantString.getListNavigator();
-    string line;
-    while (!nav_test.end()) {
-        nav_test.getCurrentItem(line);
-        cout << line << endl;
-        nav_test.next();
+//Separa todas as palavras por " "
+List<string> separateWords(List<string> giantString) {
+    ListNavigator<string> nav = giantString.getListNavigator();
+    List<string> cleanedGiantString;
+
+    while (!nav.end()) {
+        string currentLine = nav.getCurrentItem();
+        string currentWord;
+
+        for (char c : currentLine) {
+            if (c == ' ') {
+                if (!currentWord.empty()) {
+                    cleanedGiantString.insertBack(currentWord);
+                    currentWord.clear();
+                }
+            }else {
+                currentWord += c;
+            }
+        }
+        if (!currentWord.empty()) {
+            cleanedGiantString.insertBack(currentWord);
+        }
+
+        nav.next();
     }
 
-    //Tira espaco branco do Key
+    return  cleanedGiantString;
+}
+
+
+//Limpa, insere e procura
+void searcher(string key,List<string> giantString) {
+    List<string> cleanedGiantString = separateWords(giantString);
+    HashTable<string,string> ht = cleanWords(cleanedGiantString);
+
     string cleanedKey;
     for (char c : key) {
         if (c != '#' and c != ' ') {
@@ -890,11 +872,7 @@ void cleanGiantString(string key,List<string> giantString) {
         }
     }
 
-    //cout << cleanedKey << endl;
-
-
-    //isso aq e so pra ver a arvore e usar o drawTree
-    /*for (size_t i = 0; i < ht.getSize(); ++i) {
+    for (size_t i = 0; i < ht.getSize(); ++i) {
         List<AVLTree<string, string>>& bucket = ht.table[i];
 
         ListNavigator<AVLTree<string, string>> nav = bucket.getListNavigator();
@@ -907,25 +885,19 @@ void cleanGiantString(string key,List<string> giantString) {
 
             nav.next();
         }
-    }*/
+    }
 
-
-    ht.search(cleanedKey,cleanedKey);
+    ht.search(cleanedKey, cleanedKey);
 
 
 }
 
 
-
-
-//Lê cada linha e adiciona para uma List
 int main() {
     string line;
     List<string> giantString;
     string key;
 
-
-    //por enquanto so reconhece quando ### esta na ultima linha sozinho e no começo
     while (getline(cin, line)) {
         if (line.rfind("###", 0) == 0) {
             key = line.substr(3); // remove os "###"
@@ -935,29 +907,6 @@ int main() {
         }
     }
 
-
-    cleanGiantString(key, giantString);
+    searcher(key, giantString);
     return 0;
 }
-
-//Pode mexer a vontade :D
-//Lista de tarefas
-//1. Ler a string extra gigante (feito)
-//1.5 Limpar a string de sinais(feito)
-//2. Ler a chave (feito)
-//3. Adicionar a AVL na HashTable (feito)
-//3.5 Fazer esse drawTree e generateDot funcionarem (feito)
-//4. Resolver a colisao com AVL (feito)
-//5. Fazer os a AVL estar corretamente equilibrada (feito)
-//6. Adicionar a busca por chave (feito)
-//7. Mostrar a altura da chave na AVL (feito)
-//8. Terminar de implementar os métodos da AVL de acordo com oq o prof pediu no uml (feito)
-//9. Ler todo o arquivo do cap 1 D:
-
-//Caso teste
-/*
-When Mr. Bilbo Baggins of Bag End announced that he
-### Bilbo
-*/
-
-//O eleventyfirst ta sendo considerado uma palavra so, dps ver isso
